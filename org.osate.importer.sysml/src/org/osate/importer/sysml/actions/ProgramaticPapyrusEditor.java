@@ -305,6 +305,10 @@ public class ProgramaticPapyrusEditor {
 
 	}
 
+	public TransactionalEditingDomain getTransactionalEditingDomain() throws ServiceException {
+		return getServiceRegistry().getService(TransactionalEditingDomain.class);
+	}
+
 	public IOperationHistory getIOperationHistory() {
 		return papyrusEditor.getSite().getWorkbenchWindow().getWorkbench().getOperationSupport().getOperationHistory();
 	}

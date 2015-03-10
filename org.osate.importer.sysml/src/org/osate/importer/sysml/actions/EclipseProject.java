@@ -14,6 +14,10 @@ package org.osate.importer.sysml.actions;
  *
  *****************************************************************************/
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import org.eclipse.core.resources.IFile;
@@ -110,23 +114,46 @@ public class EclipseProject {
 
 		try {
 			Path toURL = new Path(toResourceName);
-			System.out.println(toURL);
 
-			IFile file = project.getFile(toResourceName);
+			IFile toFile = project.getFile(toResourceName);
 			// link all the models resources
-			if (!file.exists()) {
+			if (!toFile.exists()) {
 				// Create intermediate folders
-				ensureFolders(file);
+				ensureFolders(toFile);
 
 				URL url = FileLocator.find(Platform.getBundle(fromBundle), new Path(fromResourceName), null);
-				URL newFile = FileLocator.resolve(url);
+
+				URL fromURL = FileLocator.resolve(url);
+
+				File fileSource = new File(fromURL.toURI());
+//				File fileDestination = project.getLocation().append(new Path(toResourceName)).toFile();
+
+				System.out.println("frompath=" + fileSource);
+//				System.out.println("toPath=" + fileDestination);
+
+				filecopy(fileSource, toFile);
+
+//				Files.copy(fromPath, toPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING,
+//						StandardCopyOption.ATOMIC_MOVE);
+//				toFile = project.getFile(toResourceName);
+
+				//
+//				IWorkspace workspace = ResourcesPlugin.getWorkspace();
+//				IWorkspaceRoot workspaceRoot = workspace.getRoot();
+//				IFile[] fromFiles = workspaceRoot.findFilesForLocationURI(fromURL.toURI());
+//				IFile fromFile = fromFiles[0];
+//
+//				System.out.println("fromfile" + fromFile);
 
 				// encode the URI for spaces in the path
 				// And then create a link to the file
-				file.createLink(new URL(newFile.toString().replaceAll(" ", "%20")).toURI(), IResource.REPLACE, monitor);
+
+//				file.copy(newFile.toString());
+//				file.createLink(new URL(newFile.toString().replaceAll(" ", "%20")).toURI(), IResource.REPLACE, monitor);
 			}
-			return file;
+			return toFile;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ExecutionException("Can't copy resource '" + toResourceName + "'.", e);
 		}
 	}
@@ -211,4 +238,19 @@ public class EclipseProject {
 		}
 	}
 
+	public void filecopy(File sourceFile, IFile destFile) throws IOException, CoreException {
+
+		InputStream is = new FileInputStream(sourceFile);
+
+		destFile.create(is, IResource.REPLACE, monitor);
+
+//		OutputStream os = new FileOutputStream(destFile);
+//		int c;
+//		while ((c = is.read()) != -1) {
+//			System.out.print((char) c);
+//			os.write(c);
+//		}
+		is.close();
+//		os.close();
+	}
 }

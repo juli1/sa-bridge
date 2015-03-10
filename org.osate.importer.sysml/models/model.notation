@@ -60,7 +60,7 @@
       <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Nm98U8dOEeSFG-wnHHAu3w"/>
     </children>
     <element xmi:type="uml:Package" href="model.uml#_NmzkQMdOEeSFG-wnHHAu3w"/>
-    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Nm9VQcdOEeSFG-wnHHAu3w" x="54" y="70" width="389" height="289"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_Nm9VQcdOEeSFG-wnHHAu3w" x="135" y="105" width="389" height="289"/>
   </children>
   <styles xmi:type="notation:DiagramStyle" xmi:id="_LxC8gcdOEeSFG-wnHHAu3w"/>
   <styles xmi:type="style:PapyrusViewStyle" xmi:id="_LxC8gsdOEeSFG-wnHHAu3w">

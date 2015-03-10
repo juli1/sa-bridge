@@ -13,6 +13,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.transaction.RecordingCommand;
+import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.gmf.runtime.notation.Diagram;
 import org.eclipse.papyrus.infra.core.editor.IMultiDiagramEditor;
 import org.eclipse.papyrus.infra.core.extension.commands.IModelCreationCommand;
@@ -22,6 +23,8 @@ import org.eclipse.papyrus.infra.core.services.ExtensionServicesRegistry;
 import org.eclipse.papyrus.infra.core.services.ServiceException;
 import org.eclipse.papyrus.infra.core.services.ServicesRegistry;
 import org.eclipse.papyrus.infra.gmfdiag.common.model.NotationModel;
+import org.eclipse.papyrus.sysml.blocks.Block;
+import org.eclipse.papyrus.sysml.blocks.BlocksFactory;
 import org.eclipse.papyrus.uml.diagram.wizards.category.DiagramCategoryDescriptor;
 import org.eclipse.papyrus.uml.diagram.wizards.category.DiagramCategoryRegistry;
 import org.eclipse.papyrus.uml.diagram.wizards.category.NewPapyrusModelCommand;
@@ -315,18 +318,18 @@ public final class DoExportModel extends AbstractInstanceOrDeclarativeModelModif
 					}
 
 					ModelSet ms = editorHandler.getModelSet();
-
-					for (Resource res : ms.getResources()) {
+					Resource resToLoad;
+					resToLoad = null;
+					for (final Resource res : ms.getResources()) {
 						if (res.getURI().toString().endsWith("model.uml")) {
 							OsateDebug.osateDebug("has to load=" + res);
-							for (EObject eo : res.getContents()) {
-								OsateDebug.osateDebug("eo=" + eo);
-
-							}
+							resToLoad = res;
 						}
 						OsateDebug.osateDebug("ms res2=" + res);
 					}
-
+					if (resToLoad != null) {
+						fillUMLResource(resToLoad, editorHandler);
+					}
 //					editorHandler.dispose();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -337,7 +340,31 @@ public final class DoExportModel extends AbstractInstanceOrDeclarativeModelModif
 
 	}
 
-//	public static void fillUMLResource(UMLResource res) {
-//		OsateDebug.osateDebug("UML resource=" + res);
-//	}
+	public static void fillUMLResource(final Resource res, ProgramaticPapyrusEditor editorHandler) {
+		OsateDebug.osateDebug("UML resource=" + res);
+		for (EObject eo : res.getContents()) {
+			OsateDebug.osateDebug("eo=" + eo);
+
+		}
+		TransactionalEditingDomain editingDomain;
+		try {
+			editingDomain = editorHandler.getTransactionalEditingDomain();
+
+			final CommandStack commandStack = editingDomain.getCommandStack();
+			commandStack.execute(new RecordingCommand(editingDomain) {
+
+				@Override
+				protected void doExecute() {
+					// Save DiagramDialog at proper position
+					Block block = BlocksFactory.eINSTANCE.createBlock();
+					res.getContents().add(block);
+//				((DocumentRoot) resource.getContents().get(0)).getProcedure().get(0).add((DiagramDialog ) obj);
+				}
+			});
+		} catch (ServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 }
