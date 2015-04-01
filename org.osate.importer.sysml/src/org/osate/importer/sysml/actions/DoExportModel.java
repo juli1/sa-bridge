@@ -1,5 +1,7 @@
 package org.osate.importer.sysml.actions;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -32,6 +34,8 @@ import org.eclipse.papyrus.uml.tools.model.UmlModel;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.uml2.uml.PackageableElement;
+import org.eclipse.uml2.uml.UMLFactory;
 import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.osate.aadl2.Element;
 import org.osate.aadl2.instance.SystemInstance;
@@ -325,11 +329,16 @@ public final class DoExportModel extends AbstractInstanceOrDeclarativeModelModif
 							OsateDebug.osateDebug("has to load=" + res);
 							resToLoad = res;
 						}
-						OsateDebug.osateDebug("ms res2=" + res);
+//						OsateDebug.osateDebug("ms res2=" + res);
 					}
+//					resToLoad.unload();
 					if (resToLoad != null) {
+//						resToLoad.unload();
 						fillUMLResource(resToLoad, editorHandler);
+
 					}
+
+//					resToLoad.setModified(true);
 //					editorHandler.dispose();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -340,24 +349,98 @@ public final class DoExportModel extends AbstractInstanceOrDeclarativeModelModif
 
 	}
 
+	public static void printResourceContents(final EObject eo, int level) {
+		for (int i = 0; i < level; i++) {
+			System.out.print(" ");
+
+		}
+		System.out.print("Object " + eo);
+		if (eo instanceof org.eclipse.uml2.uml.Class) {
+			org.eclipse.uml2.uml.Class cl = (org.eclipse.uml2.uml.Class) eo;
+			System.out.print("class" + cl);
+		}
+
+		System.out.print("\n");
+		for (EObject child : eo.eContents()) {
+			printResourceContents(child, level + 3);
+
+		}
+	}
+
+	public static void updatePackage(org.eclipse.uml2.uml.Package pkg) {
+
+	}
+
+	public static void updateModel(org.eclipse.uml2.uml.Model model) {
+
+		for (int i = 0; i < model.getPackagedElements().size(); i++) {
+			PackageableElement pkg = (PackageableElement) model.getPackagedElements().get(i);
+
+			System.out.println("PackageableElement " + pkg);
+
+			org.eclipse.uml2.uml.Class newClass = UMLFactory.eINSTANCE.createClass();
+			org.eclipse.uml2.uml.Package newUMLPackage = UMLFactory.eINSTANCE.createPackage();
+
+			PackageableElement pe = model.createPackagedElement("toto", pkg.eClass());
+			pe.setName("toto");
+//			model.eContents().add(pe);
+			return;
+		}
+	}
+
+	public static void updateEObject(EObject eo) {
+
+//		System.out.println("Object " + eo);
+
+		if (eo instanceof org.eclipse.uml2.uml.Model) {
+			updateModel((org.eclipse.uml2.uml.Model) eo);
+		}
+		for (EObject child : eo.eContents()) {
+			updateEObject(child);
+
+		}
+	}
+
+	static Block newBlock;
+
 	public static void fillUMLResource(final Resource res, ProgramaticPapyrusEditor editorHandler) {
 		OsateDebug.osateDebug("UML resource=" + res);
 		for (EObject eo : res.getContents()) {
-			OsateDebug.osateDebug("eo=" + eo);
+//			OsateDebug.osateDebug("eo=" + eo);
+			printResourceContents(eo, 0);
 
 		}
 		TransactionalEditingDomain editingDomain;
+		newBlock = BlocksFactory.eINSTANCE.createBlock();
 		try {
 			editingDomain = editorHandler.getTransactionalEditingDomain();
 
 			final CommandStack commandStack = editingDomain.getCommandStack();
+//			commandStack.execute(new RecordingCommand(editingDomain) {
+//
+//				@Override
+//				protected void doExecute() {
+//					// Save DiagramDialog at proper position
+//
+////					res.getContents().add(newBlock);
+//
+////				((DocumentRoot) resource.getContents().get(0)).getProcedure().get(0).add((DiagramDialog ) obj);
+//				}
+//			});
+
 			commandStack.execute(new RecordingCommand(editingDomain) {
 
 				@Override
 				protected void doExecute() {
 					// Save DiagramDialog at proper position
-					Block block = BlocksFactory.eINSTANCE.createBlock();
-					res.getContents().add(block);
+
+					for (EObject eo : res.getContents()) {
+//						OsateDebug.osateDebug("eo=" + eo);
+						updateEObject(eo);
+
+					}
+					res.setModified(true);
+
 //				((DocumentRoot) resource.getContents().get(0)).getProcedure().get(0).add((DiagramDialog ) obj);
 				}
 			});
@@ -366,5 +449,20 @@ public final class DoExportModel extends AbstractInstanceOrDeclarativeModelModif
 			e.printStackTrace();
 		}
 
+		OsateDebug.osateDebug("UML resource after=" + res);
+		for (EObject eo : res.getContents()) {
+//			OsateDebug.osateDebug("eo=" + eo);
+			printResourceContents(eo, 0);
+
+		}
+		try {
+			res.load(null);
+			File file = new File("/tmp/newfile.txt");
+			FileOutputStream fop = new FileOutputStream(file);
+			res.save(fop, null);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

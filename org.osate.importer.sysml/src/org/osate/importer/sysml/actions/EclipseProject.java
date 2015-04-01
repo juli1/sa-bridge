@@ -117,27 +117,29 @@ public class EclipseProject {
 
 			IFile toFile = project.getFile(toResourceName);
 			// link all the models resources
-			if (!toFile.exists()) {
-				// Create intermediate folders
-				ensureFolders(toFile);
+			if (toFile.exists()) {
+				toFile.delete(true, monitor);
+			}
+			// Create intermediate folders
+			ensureFolders(toFile);
 
-				URL url = FileLocator.find(Platform.getBundle(fromBundle), new Path(fromResourceName), null);
+			URL url = FileLocator.find(Platform.getBundle(fromBundle), new Path(fromResourceName), null);
 
-				URL fromURL = FileLocator.resolve(url);
+			URL fromURL = FileLocator.resolve(url);
 
-				File fileSource = new File(fromURL.toURI());
+			File fileSource = new File(fromURL.toURI());
 //				File fileDestination = project.getLocation().append(new Path(toResourceName)).toFile();
 
-				System.out.println("frompath=" + fileSource);
+			System.out.println("frompath=" + fileSource);
 //				System.out.println("toPath=" + fileDestination);
 
-				filecopy(fileSource, toFile);
+			filecopy(fileSource, toFile);
 
 //				Files.copy(fromPath, toPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING,
 //						StandardCopyOption.ATOMIC_MOVE);
 //				toFile = project.getFile(toResourceName);
 
-				//
+			//
 //				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 //				IWorkspaceRoot workspaceRoot = workspace.getRoot();
 //				IFile[] fromFiles = workspaceRoot.findFilesForLocationURI(fromURL.toURI());
@@ -145,12 +147,12 @@ public class EclipseProject {
 //
 //				System.out.println("fromfile" + fromFile);
 
-				// encode the URI for spaces in the path
-				// And then create a link to the file
+			// encode the URI for spaces in the path
+			// And then create a link to the file
 
 //				file.copy(newFile.toString());
 //				file.createLink(new URL(newFile.toString().replaceAll(" ", "%20")).toURI(), IResource.REPLACE, monitor);
-			}
+
 			return toFile;
 		} catch (Exception e) {
 			e.printStackTrace();
