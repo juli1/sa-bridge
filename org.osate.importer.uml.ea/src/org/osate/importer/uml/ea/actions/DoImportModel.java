@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Carnegie Mellon University
+ * Copyright 2015 Carnegie Mellon University
  * 
 
  * Any opinions, findings and conclusions or recommendations expressed in this 
@@ -28,7 +28,7 @@
  * 
  */
 
-package org.osate.importer.sysml.ea.actions;
+package org.osate.importer.uml.ea.actions;
 
 import java.io.File;
 import java.util.List;
@@ -47,7 +47,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.osate.aadl2.util.OsateDebug;
-import org.osate.importer.sysml.ea.Activator;
+import org.osate.importer.uml.ea.Activator;
 import org.osgi.framework.Bundle;
 
 public final class DoImportModel implements IWorkbenchWindowActionDelegate {
@@ -82,7 +82,7 @@ public final class DoImportModel implements IWorkbenchWindowActionDelegate {
 	}
 
 	public void run(IAction action) {
-		OsateDebug.osateDebug("Import a SysML/EA Model");
+		OsateDebug.osateDebug("Import a UML/EA Model");
 		final Display d = PlatformUI.getWorkbench().getDisplay();
 
 		d.syncExec(new Runnable() {
